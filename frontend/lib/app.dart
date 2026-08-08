@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'features/search/presentation/search_screen.dart';
+import 'features/discovery/presentation/map_screen.dart';
 
 class BoraLaApp extends StatelessWidget {
   const BoraLaApp({super.key});
@@ -23,9 +23,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('BoraLá')),
-      body: const SearchScreen(),
-    );
+    return const MapScreen();
   }
 }
