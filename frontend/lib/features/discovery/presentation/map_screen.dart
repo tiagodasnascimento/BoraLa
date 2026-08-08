@@ -204,6 +204,12 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
                 ),
               ),
               if (state.status == DiscoveryStatus.loading) const _LoadingOverlay(),
+              if (state.status == DiscoveryStatus.error)
+                _MessageOverlay(
+                  message: state.errorMessage ?? 'Não foi possível carregar os eventos.',
+                  actionLabel: 'Tentar novamente',
+                  onAction: () => context.read<DiscoveryCubit>().initialize(),
+                ),
               if (state.status == DiscoveryStatus.loaded &&
                   state.markers.isEmpty &&
                   state.filterCriteria.isEmpty)

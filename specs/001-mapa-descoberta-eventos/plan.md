@@ -32,11 +32,22 @@ Transformar a tela inicial do app Flutter `BoraLá` (hoje uma lista/busca genér
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-`.specify/memory/constitution.md` ainda está no template inicial (placeholders `[PRINCIPLE_1_NAME]` etc., não ratificado) — não há princípios concretos registrados para este projeto no momento. Portanto este gate não tem critérios formais para verificar e é tratado como **não bloqueante** para esta feature. Nenhuma violação a registrar em Complexity Tracking.
+> **Revisado após o merge com `main`.** Quando este plano foi escrito, a constitution local
+> ainda era o template vazio. O merge trouxe a **Constitution v1.0.0 ratificada em 2026-08-07**
+> (`.specify/memory/constitution.md`), com 7 princípios normativos. A avaliação abaixo é o
+> re-check contra os princípios reais, com as correções já aplicadas ao código.
 
-Se o time quiser princípios de arquitetura/qualidade obrigatórios (ex.: cobertura de testes mínima, camadas obrigatórias), recomenda-se rodar `/speckit-constitution` antes de `/speckit-tasks`; isso não bloqueia o avanço deste plano.
+| Princípio | Situação | Evidência |
+|---|---|---|
+| **I. Separação estrita de camadas** | ✅ Conforme (após correção) | A feature segue `data/`/`domain/`/`presentation/`. A regra de combinação de filtros estava em `presentation/cubit/discovery_state.dart` — **violação corrigida**: movida para `FilterCriteria.matches()` em `domain/filter_criteria.dart`. |
+| **II. Contextos delimitados por domínio** | ⚠️ Justificado | `discovery` não está na lista de contextos nomeados. Justificativa registrada em Complexity Tracking. |
+| **III. Testes automatizados (NÃO-NEGOCIÁVEL)** | ⚠️ Parcial | Regra de negócio coberta por unit test (`test/filter_criteria_test.dart`, incluindo casos de borda); fluxos críticos por widget tests. **Lacuna aberta**: não há pipeline automatizado rodando a suíte a cada mudança. |
+| **IV. Contratos de API rígidos** | ➖ Não aplicável nesta feature | Sem integração com o backend: dados mockados (ver Assumptions em `spec.md`). O contrato interno está em `contracts/discovery-repository.md`. Passa a valer quando a API real for ligada. |
+| **V. Resiliência e degradação segura** | ✅ Conforme (após correção) | Loading, vazio e sem-resultado já existiam; o estado de **erro nunca era renderizado** — **violação corrigida** em `map_screen.dart`, com ação de "Tentar novamente". Degradação por localização negada já coberta (FR-017). |
+| **VI. Segurança por design** | ✅ Conforme no escopo | Sem auth, segredos ou dados pessoais nesta feature. A mensagem de erro exibida não expõe detalhes internos. |
+| **VII. Observabilidade** | ⚠️ Parcial | **Corrigido** o `catch` que engolia exceções silenciosamente: agora há log estruturado via `dart:developer`. **Lacuna aberta**: não há métricas de latência/erro (o princípio mira sobretudo endpoints do backend). |
 
-**Re-check pós Fase 1**: sem mudanças — constitution segue não ratificada; nenhuma nova violação introduzida pelo design em `data-model.md`/`contracts/`.
+**Gate**: aprovado com as duas violações concretas (Princípios I e V) já corrigidas no código. As lacunas remanescentes (pipeline de CI e métricas) são estruturais do projeto, não específicas desta feature, e estão registradas em Complexity Tracking.
 
 ## Project Structure
 
@@ -101,4 +112,12 @@ frontend/
 
 ## Complexity Tracking
 
-*Sem violações do Constitution Check a justificar — a constitution do projeto ainda não foi ratificada (ver seção acima), portanto não há gates formais a violar.*
+> Preenchido no re-check contra a Constitution v1.0.0 (pós-merge com `main`).
+> As violações dos Princípios I e V foram **corrigidas no código**, não justificadas —
+> conforme a Governance: "complexidade não justificada MUST ser removida, não documentada".
+> A tabela abaixo lista apenas o que permanece como desvio consciente.
+
+| Violação | Por que é necessária | Alternativa mais simples rejeitada porque |
+|---|---|---|
+| Feature `discovery` fora da lista de contextos nomeados do Princípio II (`accounts`, `events`, `venues`, `traffic`, …) | A tela é uma **composição** de três contextos existentes (`events`, `venues`, `traffic`) mais estado de mapa/busca/filtro que não pertence a nenhum deles isoladamente. Ela consome os contextos por suas APIs públicas (repositórios), sem tocar em estruturas internas — o que o Princípio II de fato protege. | Espalhar `MapScreen`/`DiscoveryCubit` dentro de `events` ou `venues` faria um contexto depender do outro para renderizar, que é exatamente o acoplamento que o Princípio II proíbe. Um contexto `venues` separado para a entidade `Venue` é a evolução natural quando o backend existir. |
+| Suíte de testes não roda em pipeline automatizado (Princípio III) e não há métricas de latência/erro (Princípio VII) | Lacunas **estruturais do repositório**, anteriores a esta feature: não existe CI configurado no projeto. | Montar CI e stack de observabilidade dentro desta feature expandiria o escopo muito além da experiência de descoberta especificada. Deve virar tarefa própria — o Princípio III é NÃO-NEGOCIÁVEL e essa lacuna precisa ser fechada em nível de projeto. |

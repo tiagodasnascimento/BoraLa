@@ -31,7 +31,12 @@ class DiscoveryState extends Equatable {
 
   /// Marcadores após aplicar os filtros ativos (AND entre grupos, OR dentro do grupo — FR-010).
   List<MapMarkerViewModel> get visibleMarkers =>
-      markers.where((marker) => _matchesFilters(marker, filterCriteria)).toList(growable: false);
+      markers
+          .where((marker) => filterCriteria.matches(
+                trafficStatus: marker.venue.trafficStatus,
+                events: marker.activeEvents,
+              ))
+          .toList(growable: false);
 
   bool get hasNoResultsForFilters => !filterCriteria.isEmpty && visibleMarkers.isEmpty;
 
@@ -78,26 +83,4 @@ class DiscoveryState extends Equatable {
         selectedVenueId,
         errorMessage,
       ];
-}
-
-bool _matchesFilters(MapMarkerViewModel marker, FilterCriteria criteria) {
-  if (criteria.genres.isNotEmpty) {
-    final hasMatchingGenre = marker.activeEvents.any((event) => criteria.genres.contains(event.genre));
-    if (!hasMatchingGenre) return false;
-  }
-
-  if (criteria.trafficStatuses.isNotEmpty &&
-      !criteria.trafficStatuses.contains(marker.venue.trafficStatus)) {
-    return false;
-  }
-
-  final dateRange = criteria.dateRange;
-  if (dateRange != null) {
-    final hasEventInRange = marker.activeEvents.any(
-      (event) => !event.startAt.isAfter(dateRange.end) && !event.endAt.isBefore(dateRange.start),
-    );
-    if (!hasEventInRange) return false;
-  }
-
-  return true;
 }

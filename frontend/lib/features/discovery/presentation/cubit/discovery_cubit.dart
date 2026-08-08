@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -63,7 +65,15 @@ class DiscoveryCubit extends Cubit<DiscoveryState> {
       }
 
       emit(state.copyWith(status: DiscoveryStatus.loaded, markers: markers));
-    } catch (_) {
+    } catch (error, stackTrace) {
+      // Log estruturado: a falha precisa deixar rastro, não sumir (Princípio VII).
+      // A mensagem exibida ao usuário não expõe detalhes internos (Princípio VI).
+      log(
+        'Falha ao carregar venues na área visível',
+        name: 'discovery',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(
         state.copyWith(
           status: DiscoveryStatus.error,
