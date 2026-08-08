@@ -66,7 +66,7 @@ class _EventsScreenState extends State<EventsScreen> {
                       child: ListTile(
                         leading: const Icon(Icons.event),
                         title: Text(event.name),
-                        subtitle: Text('${event.location} • ${event.category}'),
+                        subtitle: Text('${event.genre} • ${event.category}'),
                         trailing: event.isPopular ? const Icon(Icons.star, color: Colors.amber) : null,
                       ),
                     );
