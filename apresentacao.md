@@ -14,7 +14,7 @@
 
 * **Backend:** Desenvolvimento utilizando a linguagem **Elixir**, extraindo valor da máquina virtual **BEAM** (Erlang) e do modelo de atores (OTP e GenServers) para garantir o controle perfeito da alta concorrência durante picos de acessos e disputas por reservas. Utilização do Ecto para persistência de dados.
 
-* **Infraestrutura e Suporte do Ecossistema:** O projeto nasce orientado à nuvem (*Cloud Native*), empregando **Docker** para conteinerização. O fluxo de desenvolvimento exige validações automatizadas de segurança, *linting* e testes integrados em esteiras de **CI**. 
+* **Infraestrutura e Suporte do Ecossistema:** O projeto nasce orientado à nuvem (*Cloud Native*), empregando **Docker** para conteinerização. O fluxo de desenvolvimento exige validações automatizadas de testes e build integrados em esteiras de **CI**, no **GitHub Actions**. 
 
 # Comandos do Speckit
 
@@ -189,6 +189,10 @@ Antes de implementar, analise o mockup e extraia dele os principais padrões vis
 ```bash
 /speckit.implement
 ```
+
+## Instruções para correção do CI
+
+- Vibecode. 
 
 ## Desvantagens e Limitações Identificadas:
 
